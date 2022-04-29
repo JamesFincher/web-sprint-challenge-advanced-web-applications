@@ -1,6 +1,6 @@
 export const postLogin = "http://localhost:9000/api/login";
 
-export const getArticle = "http://localhost:9000/api/articles";
+export const getArticles = "http://localhost:9000/api/articles";
 
 export const postArticle = "http://localhost:9000/api/articles";
 

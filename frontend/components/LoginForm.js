@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PT from "prop-types";
 
 const initialFormValues = {
@@ -6,7 +6,7 @@ const initialFormValues = {
   password: "",
 };
 export default function LoginForm(props) {
-  const { login, message, spinnerOn } = props;
+  const { login, message, spinnerOn, redirectToArticles } = props;
   const [values, setValues] = useState(initialFormValues);
   // ✨ where are my props? Destructure them here
 
@@ -21,9 +21,9 @@ export default function LoginForm(props) {
       "username": "${values.username}",
       "password": "${values.password}"
     }`;
-    console.log(payload);
     const { username, password } = values;
     login(payload);
+
     // ✨ implement
   };
 
@@ -33,6 +33,11 @@ export default function LoginForm(props) {
     // trimmed password must be >= 8 for
     // the button to become enabled
   };
+  useEffect(() => {
+    if (localStorage.token) {
+      redirectToArticles();
+    }
+  }, []);
 
   return (
     <form id="loginForm" onSubmit={onSubmit}>

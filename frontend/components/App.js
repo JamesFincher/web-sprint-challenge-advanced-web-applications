@@ -7,7 +7,7 @@ import ArticleForm from "./ArticleForm";
 import Spinner from "./Spinner";
 import * as URI from "./URI";
 import axios from "axios";
-
+import * as useAuth from "../axios/index";
 const articlesUrl = "http://localhost:9000/api/articles";
 const loginUrl = "http://localhost:9000/api/login";
 
@@ -20,7 +20,7 @@ export default function App() {
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate();
   const redirectToLogin = () => {
-    navigate("/login");
+    navigate("/");
 
     /* ✨ implement */
   };
@@ -44,28 +44,31 @@ export default function App() {
     const { username, password } = JSON.parse(payload);
     setMessage("");
     setSpinnerOn(true);
-
-    axios
-      .post(URI.postLogin, { username, password })
-      .then((response) => {
-        console.log(response.data);
-        localStorage.setItem("token", response.data.token);
-        redirectToArticles();
-        setSpinnerOn(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setMessage(error.response.data.message);
-      });
-    // ✨ implement
-    // We should flush the message state, turn on the spinner
-    // and launch a request to the proper endpoint.
-    // On success, we should set the token to local storage in a 'token' key,
-    // put the server success message in its proper state, and redirect
-    // to the Articles screen. Don't forget to turn off the spinner!
+    useAuth.axiosLogin(URI.postLogin, payload).then((response) => {
+      const { token } = response.data;
+      console.log(response.data);
+      localStorage.setItem("token", token);
+      setMessage(response.data.message);
+      redirectToArticles();
+      setSpinnerOn(false);
+    });
   };
 
   const getArticles = () => {
+    setMessage("");
+    setSpinnerOn(true);
+    useAuth
+      .axiosGetWithAuth(URI.getArticles)
+      .then((response) => {
+        setArticles(response.data);
+        setSpinnerOn(false);
+        setMessage(response.data.message);
+      })
+      .catch((error) => {
+        setMessage(error.response.data.message);
+        setSpinnerOn(false);
+      });
+
     // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch an authenticated request to the proper endpoint.
@@ -96,7 +99,7 @@ export default function App() {
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <React.StrictMode>
       <Spinner />
-      <Message />
+      <Message message={message} />
       <button id="logout" onClick={logout}>
         Logout from app
       </button>
@@ -120,6 +123,7 @@ export default function App() {
                 login={login}
                 setSpinnerOn={setSpinnerOn}
                 setMessage={setMessage}
+                redirectToArticles={redirectToArticles}
               />
             }
           />
@@ -128,7 +132,18 @@ export default function App() {
             element={
               <>
                 <ArticleForm />
-                <Articles />
+                <Articles
+                  setSpinnerOn={setSpinnerOn}
+                  currentArticleId={currentArticleId}
+                  articles={articles}
+                  setArticles={setArticles}
+                  setMessage={setMessage}
+                  getArticles={getArticles}
+                  postArticle={postArticle}
+                  updateArticle={updateArticle}
+                  deleteArticle={deleteArticle}
+                  redirectToLogin={redirectToLogin}
+                />
               </>
             }
           />
