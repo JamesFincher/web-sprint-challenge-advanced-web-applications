@@ -1,40 +1,25 @@
 import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import PT from "prop-types";
-import * as useAuth from "../axios/index";
-import * as URI from "./URI";
 
 export default function Articles(props) {
-  // ✨ where are my props? Destructure them here
   const {
     articles,
-    setArticles,
-    message,
-    setMessage,
-    spinnerOn,
-    setSpinnerOn,
-    redirectToLogin,
+    getArticles,
+    deleteArticle,
+    setCurrentArticleId,
+    currentArticleId,
   } = props;
+
+  if (!window.localStorage.getItem("token")) {
+    return <Navigate to="/" />;
+  }
+
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      redirectToLogin();
-    } else {
-      useAuth.axiosGetWithAuth(URI.getArticles).then((response) => {
-        console.log(response.data);
-        setSpinnerOn(true);
-        setArticles(response.data.articles);
-        setMessage(response.data.message);
-        setSpinnerOn(false);
-      });
-    }
+    getArticles();
   }, []);
 
-  // ✨ implement conditional logic: if no token exists
-  // we should render a Navigate to login screen (React Router v.6)
-
   return (
-    // ✨ fix the JSX: replace `Function.prototype` with actual functions
-    // and use the articles prop to generate articles
     <div className="articles">
       <h2>Articles</h2>
       {!articles.length
@@ -48,10 +33,16 @@ export default function Articles(props) {
                   <p>Topic: {art.topic}</p>
                 </div>
                 <div>
-                  <button disabled={true} onClick={Function.prototype}>
+                  <button
+                    disable={currentArticleId}
+                    onClick={() => setCurrentArticleId(art.article_id)}
+                  >
                     Edit
                   </button>
-                  <button disabled={true} onClick={Function.prototype}>
+                  <button
+                    disable={currentArticleId}
+                    onClick={() => deleteArticle(art.article_id)}
+                  >
                     Delete
                   </button>
                 </div>

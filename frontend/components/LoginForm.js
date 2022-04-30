@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import PT from "prop-types";
 
 const initialFormValues = {
@@ -6,9 +6,8 @@ const initialFormValues = {
   password: "",
 };
 export default function LoginForm(props) {
-  const { login, message, spinnerOn, redirectToArticles } = props;
   const [values, setValues] = useState(initialFormValues);
-  // ✨ where are my props? Destructure them here
+  const { login } = props;
 
   const onChange = (evt) => {
     const { id, value } = evt.target;
@@ -17,27 +16,11 @@ export default function LoginForm(props) {
 
   const onSubmit = (evt) => {
     evt.preventDefault();
-    const payload = `{
-      "username": "${values.username}",
-      "password": "${values.password}"
-    }`;
-    const { username, password } = values;
-    login(payload);
-
-    // ✨ implement
+    login(values);
   };
 
-  const isDisabled = () => {
-    // ✨ implement
-    // Trimmed username must be >= 3, and
-    // trimmed password must be >= 8 for
-    // the button to become enabled
-  };
-  useEffect(() => {
-    if (localStorage.token) {
-      redirectToArticles();
-    }
-  }, []);
+  const isDisabled =
+    values.username.trim().length >= 3 && values.password.trim().length >= 8;
 
   return (
     <form id="loginForm" onSubmit={onSubmit}>
@@ -55,8 +38,9 @@ export default function LoginForm(props) {
         onChange={onChange}
         placeholder="Enter password"
         id="password"
+        type="password"
       />
-      <button disabled={isDisabled()} id="submitCredentials">
+      <button disabled={!isDisabled} id="submitCredentials">
         Submit credentials
       </button>
     </form>
